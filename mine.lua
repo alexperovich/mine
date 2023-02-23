@@ -7,14 +7,14 @@ cfg.localConfig = {
 	useRemoteConfig = false,
 	remoteConfigPath = "http://localhost:33344/config.lua",
 	--this command will be used when the program is started as "mine def" (mineLoop overrides this command)
-	defaultCommand = "cube 3 3 8",
+	defaultCommand = "branch 15 32",
 	--false: build walls/floor/ceiling everywhere, true: only where there is fluid
 	plugFluidsOnly = true,
 	--maximum taxicab distance from enterance point when collecting ores, 0 = disable ore traversal
-	oreTraversalRadius = 0,
+	oreTraversalRadius = 10,
 	--layer mining order, use "z" for branch mining, "y" for anything else
 	--"y" - mine top to bottom layer by layer, "z" - mine forward in vertical slices
-	layerSeparationAxis="y",
+	layerSeparationAxis="z",
 	--false: use regular chests, true: use entangled chests
 	--if true, the turtle will place a single entangled chest to drop off items and break it afterwards.
 	--tested with chests from https://www.curseforge.com/minecraft/mc-mods/kibe
