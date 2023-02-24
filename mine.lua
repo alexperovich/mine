@@ -28,7 +28,9 @@ cfg.localConfig = {
 	--mineLoopCommand is used in place of defaultCommand when launching as "mine def"
 	mineLoop = false,
 	mineLoopOffset = {x=0, y=0, z=8},
-	mineLoopCommand = "rcube 1 1 1"
+	mineLoopCommand = "rcube 1 1 1",
+	
+	fuelItem = "minecraft:coal"
 }
 
 cfg.getRemoteConfig = function(remotePath)
@@ -1459,7 +1461,7 @@ end
 
 
 
-local function sortInventory(sortFuel)
+local function sortInventory(sortFuel, fuelItem)
 	--clear cobble slot
 	local initCobbleData = wrapt.getItemDetail(slots.get(BLOCK_SLOT))
 	if initCobbleData and initCobbleData.name ~= "minecraft:cobblestone" then
@@ -1470,7 +1472,7 @@ local function sortInventory(sortFuel)
 	--clear fuel slot
 	if sortFuel then
 		local initFuelData = wrapt.getItemDetail(slots.get(FUEL_SLOT))
-		if initFuelData and initFuelData.name ~= "minecraft:charcoal" then
+		if initFuelData and initFuelData.name ~= fuelItem then
 			wrapt.select(slots.get(FUEL_SLOT))
 			wrapt.drop()
 		end
@@ -1491,7 +1493,7 @@ local function sortInventory(sortFuel)
 			if curData.name == "minecraft:cobblestone" then
 				wrapt.select(i)
 				wrapt.transferTo(slots.get(BLOCK_SLOT))
-			elseif sortFuel and curData.name == "minecraft:charcoal" then
+			elseif sortFuel and curData.name == fuelItem then
 				wrapt.select(i)
 				wrapt.transferTo(slots.get(FUEL_SLOT))
 			end
@@ -1698,11 +1700,11 @@ local function refuelEntangled(chestData, diggingArea, dropOffEntangled)
 	end
 end
 
-local function refuelNormally()
+local function refuelNormally(fuelItem)
 	repeat
 		local fuelData = wrapt.getItemDetail(slots.get(FUEL_SLOT))
 		if not fuelData then
-			sortInventory(true)
+			sortInventory(true, fuelItem)
 		end
 		repeat
 			local newFuelData = wrapt.getItemDetail(slots.get(FUEL_SLOT))
@@ -1717,13 +1719,13 @@ local function refuelNormally()
 	until wrapt.getFuelLevel() > REFUEL_THRESHOLD
 end
 
-local function tryToRefuel(chestData, diggingArea, dropOffEntangledChest, refuelEntangledChest)
+local function tryToRefuel(chestData, diggingArea, dropOffEntangledChest, refuelEntangledChest, fuelItem)
 	if wrapt.getFuelLevel() < REFUEL_THRESHOLD then
 		if refuelEntangledChest then 
 			refuelEntangled(chestData, diggingArea, dropOffEntangledChest)
 			return
 		else
-			refuelNormally()
+			refuelNormally(fuelItem)
 			return
 		end
 	end
@@ -1736,10 +1738,10 @@ local function executeDigging(layers, diggingArea, chestData, config)
 	for layerIndex, layer in ipairs(layers) do
 		for blockIndex, block in ipairs(layer) do
 			if counter % 5 == 0 or not wrapt.getItemDetail(slots.get(BLOCK_SLOT)) then
-				sortInventory(not config.useFuelEntangledChest)
+				sortInventory(not config.useFuelEntangledChest, config.fuelItem)
 			end
 			if counter % 5 == 0 then
-				tryToRefuel(chestData, diggingArea, config.useEntangledChests, config.useFuelEntangledChest)
+				tryToRefuel(chestData, diggingArea, config.useEntangledChests, config.useFuelEntangledChest, config.fuelItem)
 			end
 			tryDropOffThings(chestData, diggingArea, config.useEntangledChests)
 			if not diggingArea[helper.getIndex(block.x, block.y, block.z)].preserve then
